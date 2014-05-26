@@ -97,7 +97,8 @@ def run():
         
         if d['heartcount'] < 50:
             print "adding levels by " + d['name'] + " to level list ..."
-            levellist.extend(d['levels'][:5])
+            max = min(50 - d['hearcount'], 6)
+            levellist.extend(d['levels'][:max])
         else:
             print "skipping " + d['name'] + ". Already enough level hearts."
         
