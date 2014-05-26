@@ -4,78 +4,132 @@ from urllib2 import urlopen
 import sys
 import time
 
-def findLbpLevels(player):
-    levels = []
+
+
+def findSessionPlayers(sessionurl):
+    players = []
     
-    soupurl = "http://lbp.me/u/" + player + "/levels"
+    # prepare soup
+    soupdata = urlopen(sessionurl).read()
+    soup = BeautifulSoup(soupdata)
+    
+    # find players in session
+    plist = soup.find('div', attrs = {'class': 'sidebar'}).find('table').find_all('tr')
+    for pentry in plist:
+        player = pentry.find_all('a')[1].getText()
+        players.append(player)
+ 
+    return players
+    
+
+
+def findPlayerData(player):
+    playerdata = {
+        'name': '',
+        'profile': '',
+        'authorcount': 0,
+        'heartcount': 0,
+        'playcount': 0,
+        'mostplayed': '',
+        'levels': []
+    }
+    
+    
+    # prepare soup
+    soupurl = 'http://lbp.me/u/' + player + '/levels'
     soupdata = urlopen(soupurl).read()
-    soup = BeautifulSoup(soupdata)
+    soup = BeautifulSoup(soupdata) 
     
-    levellist = soup.find_all('li', attrs = {'class': 'level'})
+    # set name and profile
+    playerdata['name'] = player
+    playerdata['profile'] = 'http://lbp.me/u/' + player
     
-    for levelentry in levellist:
-        hearts = levelentry.find('li', attrs = {'class': 'hearted'}).getText()
+    # set author heart count
+    authorcount = soup.find('div', class_='user-profile-details')
+    authorcount = authorcount.find('li', class_='hearted')
+    authorcount = authorcount.getText().replace(",", "")
+    playerdata['authorcount'] = int(authorcount)
+    
+    # the rest
+    llist = soup.find_all('li', class_='level')
+    for lentry in llist:
+        # set level url
+        level = lentry.find_all('a')[1].get('href')
+        level = 'http://lbp.me' + level
+        playerdata['levels'].append(level)
         
-        if len(hearts) > 2:
-            return []
+        # set heartcount
+        heartcount = lentry.find('li', class_='hearted').getText()
+        heartcount = heartcount.replace(",", "")
+        playerdata['heartcount'] += int(heartcount)
+        
+        # set highest played level
+        playcount = lentry.find('li', class_='plays').getText()
+        playcount = int(playcount.replace(",", ""))
+        if playcount >= playerdata['playcount']:
+            playerdata['playcount'] = playcount
+            playerdata['mostplayed'] = level
+    
+    return playerdata;
 
-        hearts = int(hearts)
-        if hearts > 49:
-            return []
-            
-        level = levelentry.find_all('a')[1].get('href')
-        levels.append(level)
-            
-    return levels
 
-def findSessionMembers(url):
-    members = []
-     
-    soupdata = urlopen(url).read()
-    soup = BeautifulSoup(soupdata)
-    
-    playerlist = soup.find('div', attrs = {'class': 'sidebar'}).find('table').find_all('tr')
-   
-    for playerentry in playerlist:
-        player = playerentry.find_all('td')[1].find('a').getText()
-        members.append(player)
-        
-    return members
-        
-    
+
 def run():
-    if len(sys.argv) == 1:
-        print "No session given. "
-        return 0;    
-        
-    sessionurl = sys.argv[1]
-    if sessionurl[:39] != "http://psnprofiles.com/gaming-sessions/":
-        print "Wrong session url. "
+    authorlist = []
+    levellist = []
+    playlist = []
+    
+    if len(sys.argv) != 2:
+        print "Invalid arguments."
         return 0;
         
-    print "Finding players ..."
-    players = findSessionMembers(sessionurl)
     
-    print "Finding levels ..."
-    levels = []
+    players = findSessionPlayers(sys.argv[1])
+    
     for player in players:
-        print "Finding levels for player " + player + " ..."
-        playerlevels = findLbpLevels(player)
-        levels.extend(playerlevels)
+        d = findPlayerData(player)
+        
+        if d['authorcount'] < 30:
+            print "adding " + d['name'] + " to author list ..."
+            authorlist.append(d['profile'])
+        else:
+            print "skipping " + d['name'] + ". Already enough author hearts."
+        
+        if d['heartcount'] < 50:
+            print "adding levels by " + d['name'] + " to level list ..."
+            levellist.extend(d['levels'][:5])
+        else:
+            print "skipping " + d['name'] + ". Already enough level hearts."
+        
+        if d['playcount'] < 50:
+            print "adding most played level by " + d['name'] + " to play list ..."
+            playlist.append(d['mostplayed'])
+        else:
+            print "skipping " + d['name'] + ". Already enough plays"
+        
         print "Waiting ..."
         time.sleep(2)
-        
-    print "Writing URLs to urls.txt"
-    f = open("urls.txt", "w")
-    for player in players:
-        f.write("http://lbp.me/u/" + player + "\n")    
-    f.write("\n")
-    for level in levels:
-        f.write("http://lbp.me" + level + "\n")
-    f.close()
-    
-    print "Done."
-    
-    
 
+    print "Writing lists to urls.txt ..."
+    f = open("urls.txt", "w")
+    
+    f.write("Like these authors:\n\n")
+    for a in authorlist:
+        f.write(a + "\n")
+        
+    f.write("\n\n\nAdd these levels to your queue and heart them in-game:\n\n")
+    for l in levellist:
+        f.write(l + "\n")
+        
+    f.write("\n\n\nPlay these levels:\n\n")
+    for p in playlist:
+        f.write(p + "\n")
+            
+    print "Done."
+    f.close()
+                
+
+        
+        
+        
 run()
