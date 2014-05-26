@@ -2,33 +2,36 @@ from bs4 import BeautifulSoup
 from urllib2 import urlopen
 
 import sys
+import time
 
-def findLbpLevel(player):
-    lbpurl = ""
-    lbphearts = 0;
+def findLbpLevels(player):
+    levels = []
     
     soupurl = "http://lbp.me/u/" + player + "/levels"
     soupdata = urlopen(soupurl).read()
-    #soupdata = open('lbpme.html').read()
     soup = BeautifulSoup(soupdata)
+    
     levellist = soup.find_all('li', attrs = {'class': 'level'})
+    
     for levelentry in levellist:
         hearts = levelentry.find('li', attrs = {'class': 'hearted'}).getText()
         
         if len(hearts) > 2:
-            return ""
+            return []
 
         hearts = int(hearts)
-        if hearts > lbphearts:
-            lbpurl = "http://lbp.me" + levelentry.find_all('a')[1].get('href')
+        if hearts > 49:
+            return []
             
-    return lbpurl
+        level = levelentry.find_all('a')[1].get('href')
+        levels.append(level)
+            
+    return levels
 
 def findSessionMembers(url):
     members = []
      
     soupdata = urlopen(url).read()
-    #soupdata = open('psnprofiles.html').read()
     soup = BeautifulSoup(soupdata)
     
     playerlist = soup.find('div', attrs = {'class': 'sidebar'}).find('table').find_all('tr')
@@ -50,8 +53,29 @@ def run():
         print "Wrong session url. "
         return 0;
         
+    print "Finding players ..."
     players = findSessionMembers(sessionurl)
+    
+    print "Finding levels ..."
+    levels = []
     for player in players:
-        print findLbpLevel(player)
+        print "Finding levels for player " + player + " ..."
+        playerlevels = findLbpLevels(player)
+        levels.extend(playerlevels)
+        print "Waiting ..."
+        time.sleep(2)
+        
+    print "Writing URLs to urls.txt"
+    f = open("urls.txt", "w")
+    for player in players:
+        f.write("http://lbp.me/u/" + player + "\n")    
+    f.write("\n")
+    for level in levels:
+        f.write("http://lbp.me" + level + "\n")
+    f.close()
+    
+    print "Done."
+    
+    
 
 run()
