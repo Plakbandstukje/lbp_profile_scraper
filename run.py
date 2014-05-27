@@ -34,7 +34,6 @@ def findPlayerData(player):
         'levels': []
     }
     
-    
     # prepare soup
     soupurl = 'http://lbp.me/u/' + player + '/levels'
     soupdata = urlopen(soupurl).read()
@@ -112,39 +111,47 @@ def run():
         print "Waiting ..."
         time.sleep(2)
 
-    print "Writing lists to lbp.html ..."
-    f = open("lbp.html", "w")
-    f.write("""
+    
+    html_begin = """
         <html>
             <head>
                 <title>LBP</title>    
             </head>
             <body>
-    """)
-    
-    f.write("<p>Like these authors:</p>")
-    for a in authorlist:
-        f.write("<a href='" + a + "'>" + a + "</a></br>")
-        
-    f.write("<p>Add these levels to your queue and heart them in-game:</p>")
-    for l in levellist:
-        f.write("<a href='" + l + "'>" + l + "</a></br>")
-        
-    f.write("<p>Play these levels:</p>")
-    for p in playlist:
-        f.write("<a href='" + p + "'>" + p + "</a></br>")
-            
-    f.write("""
-            <p><a href='https://github.com/mmans93/lbp_psnprofiles'>source</a></p>
+    """
+    html_end = """
+            <p><a href='https://github.com/plakbandstukje/lbp_profile_scraper/'>script source</a></p>
             </body>
         </html>
-    """)
+    """
+    
+    flevels = open("levels.html", "w")
+    fauthors = open("authors.html", "w")
+    fplays = open("plays.html", "w")
+    
+    print "Writing authors list to authors.html"
+    fauthors.write(html_begin + "<p>Like these authors:</p>")
+    for a in authorlist:
+        fauthors.write("<a href='" + a + "'>" + a + "</a></br>")
+    fauthors.write(html_end)
+    fauthors.close()
+    
+    print "Writing levels list to levels.html"
+    flevels.write(html_begin + "<p>Add these levels to your queue and heart them in-game:</p>")
+    for l in levellist:
+        flevels.write("<a href='" + l + "'>" + l + "</a></br>")
+    flevels.write(html_end)
+    flevels.close()
+        
+    print "Writing plays list to plays.html"
+    fplays.write(html_begin + "<p>Play these levels:</p>")
+    for p in playlist:
+        fplays.write("<a href='" + p + "'>" + p + "</a></br>")
+    fplays.write(html_end)
+    flevels.close()
+    
     
     print "Done."
-    f.close()
-                
-
-        
-        
+    
         
 run()
