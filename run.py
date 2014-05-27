@@ -14,7 +14,7 @@ def findSessionPlayers(sessionurl):
     soup = BeautifulSoup(soupdata)
     
     # find players in session
-    plist = soup.find('div', attrs = {'class': 'sidebar'}).find('table').find_all('tr')
+    plist = soup.find('div', class_='sidebar').find('table').find_all('tr')
     for pentry in plist:
         player = pentry.find_all('a')[1].getText()
         players.append(player)
@@ -102,30 +102,44 @@ def run():
         else:
             print "skipping " + d['name'] + ". Already enough level hearts."
         
-        if d['playcount'] < 50:
+        # is playcount on lbp.me in unique players?
+        if d['playcount'] < 60 and d['mostplayed'] != "":
             print "adding most played level by " + d['name'] + " to play list ..."
             playlist.append(d['mostplayed'])
         else:
-            print "skipping " + d['name'] + ". Already enough plays"
+            print "skipping " + d['name'] + ". Already enough plays or no public profile."
         
         print "Waiting ..."
         time.sleep(2)
 
-    print "Writing lists to urls.txt ..."
-    f = open("urls.txt", "w")
+    print "Writing lists to lbp.html ..."
+    f = open("lbp.html", "w")
+    f.write("""
+        <html>
+            <head>
+                <title>LBP</title>    
+            </head>
+            <body>
+    """)
     
-    f.write("Like these authors:\n\n")
+    f.write("<p>Like these authors:</p>")
     for a in authorlist:
-        f.write(a + "\n")
+        f.write("<a href='" + a + "'>" + a + "</a></br>")
         
-    f.write("\n\n\nAdd these levels to your queue and heart them in-game:\n\n")
+    f.write("<p>Add these levels to your queue and heart them in-game:</p>")
     for l in levellist:
-        f.write(l + "\n")
+        f.write("<a href='" + l + "'>" + l + "</a></br>")
         
-    f.write("\n\n\nPlay these levels:\n\n")
+    f.write("<p>Play these levels:</p>")
     for p in playlist:
-        f.write(p + "\n")
+        f.write("<a href='" + p + "'>" + p + "</a></br>")
             
+    f.write("""
+            <p><a href='https://github.com/mmans93/lbp_psnprofiles'>source</a></p>
+            </body>
+        </html>
+    """)
+    
     print "Done."
     f.close()
                 
