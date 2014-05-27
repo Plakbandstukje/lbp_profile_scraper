@@ -101,8 +101,7 @@ def run():
         else:
             print "skipping " + d['name'] + ". Already enough level hearts."
         
-        # is playcount on lbp.me in unique players?
-        if d['playcount'] < 60 and d['mostplayed'] != "":
+        if d['playcount'] < 50 and d['mostplayed'] != "":
             print "adding most played level by " + d['name'] + " to play list ..."
             playlist.append(d['mostplayed'])
         else:
