@@ -111,46 +111,35 @@ def run():
         time.sleep(2)
 
     
-    html_begin = """
-        <html>
-            <head>
-                <title>LBP</title>    
-            </head>
-            <body>
-    """
-    html_end = """
-            <p><a href='https://github.com/plakbandstukje/lbp_profile_scraper/'>script source</a></p>
-            </body>
-        </html>
-    """
+    html_begin = "<html><head><title>LBP</title><link rel='stylesheet' ' href='style.css' type='text/css' /></head><body>"
+    html_end = "<p><a href='https://github.com/plakbandstukje/lbp_profile_scraper/'>script source</a></p></body></html>"
     
     flevels = open("levels.html", "w")
     fauthors = open("authors.html", "w")
     fplays = open("plays.html", "w")
     
     print "Writing authors list to authors.html"
-    fauthors.write(html_begin + "<p>Like these authors:</p>")
+    fauthors.write(html_begin + "<p>Like these authors on lbp.me:</p>\n")
     for a in authorlist:
-        fauthors.write("<a href='" + a + "'>" + a + "</a></br>")
+        fauthors.write("<a href='" + a + "'>" + a + "</a></br>\n")
     fauthors.write(html_end)
     fauthors.close()
     
     print "Writing levels list to levels.html"
-    flevels.write(html_begin + "<p>Add these levels to your queue and heart them in-game:</p>")
+    flevels.write(html_begin + "<p>Add these levels to your queue and heart them in-game:</p>\n")
     for l in levellist:
-        flevels.write("<a href='" + l + "'>" + l + "</a></br>")
+        flevels.write("<a href='" + l + "'>" + l + "</a></br>\n")
     flevels.write(html_end)
     flevels.close()
         
     print "Writing plays list to plays.html"
-    fplays.write(html_begin + "<p>Play these levels:</p>")
+    fplays.write(html_begin + "<p>Add these levels to your queue and play them in-game:</p>\n")
     for p in playlist:
-        fplays.write("<a href='" + p + "'>" + p + "</a></br>")
+        fplays.write("<a href='" + p + "'>" + p + "</a></br>\n")
     fplays.write(html_end)
     flevels.close()
     
     
     print "Done."
-    
         
 run()
