@@ -78,12 +78,18 @@ def run():
     levellist = []
     playlist = []
     
-    if len(sys.argv) != 2:
+    if len(sys.argv) == 1:
         print "Invalid arguments."
         return 0;
         
-    
-    players = findSessionPlayers(sys.argv[1])
+    # find players in session(s)
+    players = []
+    for sessionurl in sys.argv[1:]:
+        members = findSessionPlayers(sessionurl)
+        for member in members:
+            if member not in players:
+                players.append(member)
+        
     
     for player in players:
         d = findPlayerData(player)
