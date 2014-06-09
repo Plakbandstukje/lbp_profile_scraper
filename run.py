@@ -1,9 +1,8 @@
 from bs4 import BeautifulSoup
 from urllib2 import urlopen
-
+from datetime import datetime
 import sys
 import time
-import datetime
 
 
 
@@ -79,10 +78,17 @@ def run():
     levellist = []
     playlist = []
     
-    if len(sys.argv) != 2:
+    if len(sys.argv) == 1:
         print "Invalid arguments."
         return 0;
         
+    # find players in session(s)
+    players = []
+    for sessionurl in sys.argv[1:]:
+        members = findSessionPlayers(sessionurl)
+        for member in members:
+            if member not in players:
+                players.append(member)    
     
     players = findSessionPlayers(sys.argv[1])
     
