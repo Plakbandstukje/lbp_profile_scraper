@@ -3,6 +3,7 @@ from urllib2 import urlopen
 
 import sys
 import time
+import datetime
 
 
 
@@ -78,18 +79,12 @@ def run():
     levellist = []
     playlist = []
     
-    if len(sys.argv) == 1:
+    if len(sys.argv) != 2:
         print "Invalid arguments."
         return 0;
         
-    # find players in session(s)
-    players = []
-    for sessionurl in sys.argv[1:]:
-        members = findSessionPlayers(sessionurl)
-        for member in members:
-            if member not in players:
-                players.append(member)
-        
+    
+    players = findSessionPlayers(sys.argv[1])
     
     for player in players:
         d = findPlayerData(player)
@@ -117,33 +112,31 @@ def run():
         time.sleep(2)
 
     
-    html_begin = "<html><head><title>LBP</title><link rel='stylesheet' ' href='style.css' type='text/css' /></head><body>"
-    html_end = "<p><a href='https://github.com/plakbandstukje/lbp_profile_scraper/'>script source</a></p></body></html>"
+    html_begin = "<html><head><title>LBP</title><link rel='stylesheet' ' href='style.css' type='text/css' /></head><body><table><tr>"
+    update_time = datetime.now().strftime('%d-%m-%Y %H:%M:%S')
+    html_end = "</tr></table><p>Last updated: " + update_time + "</p></body></html>"
     
-    flevels = open("levels.html", "w")
-    fauthors = open("authors.html", "w")
-    fplays = open("plays.html", "w")
+    f = open("list.html", "w")
+    f.write(html_begin)
     
-    print "Writing authors list to authors.html"
-    fauthors.write(html_begin + "<p>Like these authors on lbp.me:</p>\n")
+    print "Writing authors list ..."
+    f.write("<td><p>Like these authors on lbp.me:</p>\n")
     for a in authorlist:
-        fauthors.write("<a href='" + a + "'>" + a + "</a></br>\n")
-    fauthors.write(html_end)
-    fauthors.close()
+        f.write("<a href='" + a + "' target='_blank'>" + a + "</a></br>\n")
+    f.write("</td>")
     
-    print "Writing levels list to levels.html"
-    flevels.write(html_begin + "<p>Add these levels to your queue and heart them in-game:</p>\n")
+    print "Writing levels list ..."
+    f.write("<td><p>Add these levels to your queue and heart them in-game:</p>\n")
     for l in levellist:
-        flevels.write("<a href='" + l + "'>" + l + "</a></br>\n")
-    flevels.write(html_end)
-    flevels.close()
+        f.write("<a href='" + l + "' target='_blank'>" + l + "</a></br>\n")
+    f.write("</td>")
         
-    print "Writing plays list to plays.html"
-    fplays.write(html_begin + "<p>Add these levels to your queue and play them in-game:</p>\n")
+    print "Writing plays list ..."
+    f.write("<td><p>Add these levels to your queue and play them in-game:</p>\n")
     for p in playlist:
-        fplays.write("<a href='" + p + "'>" + p + "</a></br>\n")
-    fplays.write(html_end)
-    flevels.close()
+        f.write("<a href='" + p + "' target='_blank'>" + p + "</a></br>\n")
+    f.write("</td>" + html_end)
+    f.close()
     
     
     print "Done."
